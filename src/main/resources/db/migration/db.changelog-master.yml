@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: db/migration/001-create-initial-tables.yml
+  - include:
+      file: db/migration/002-create-test-data.yml
+  - include:
+      file: db/migration/003-fix-user-passwords.yml
+  - include:
+      file: db/migration/004-fix-correct-user-passwords.yml
+  - include:
+      file: db/migration/006-create-block-requests-table.yml
+  - include:
+      file: db/migration/007-refactor-expiration-date.yml

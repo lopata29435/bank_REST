@@ -1,0 +1,96 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: bank-cards-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bankdb
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-test-query: SELECT 1
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+
+  liquibase:
+    change-log: classpath:db/migration/db.changelog-master.yml
+    enabled: true
+    drop-first: false
+    contexts: default
+    default-schema: public
+    liquibase-schema: public
+    parameters:
+      database.autoCommit: false
+
+app:
+  max-sessions-per-user: ${MAX_SESSIONS_PER_USER:5}
+
+jwt:
+  secret: ${JWT_SECRET:mySecretKey}
+  access:
+    expiration: ${JWT_ACCESS_EXPIRATION:3600000} # 1 hour
+  refresh:
+    expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days
+  cleanup:
+    interval: ${JWT_CLEANUP_INTERVAL:7200000} # 2 hours
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.example.bankcards: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+card:
+  encryption:
+    key: "${CARD_ENCRYPTION_KEY:wM2y4L8tZ+P9v3uQ6e1sR0hT7fG5jK2l}"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/bankdb}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+
+logging:
+  level:
+    com.example.bankcards: ${LOGGING_LEVEL_COM_EXAMPLE_BANKCARDS:INFO}
+    org.springframework.security: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY:WARN}
+    org.hibernate.SQL: INFO
+  file:
+    name: /app/logs/bank-cards.log

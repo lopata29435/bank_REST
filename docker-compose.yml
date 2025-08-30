@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bank-postgres
+    environment:
+      POSTGRES_DB: bankdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=ru_RU.UTF-8 --lc-ctype=ru_RU.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/init:/docker-entrypoint-initdb.d
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bankdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  bank-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bank-rest-api
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bankdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+
+      JWT_SECRET: myVerySecretKeyForJWTTokenGeneration2024!
+      JWT_ACCESS_EXPIRATION: 300000
+      JWT_REFRESH_EXPIRATION: 604800000
+      JWT_CLEANUP_INTERVAL: 7200000
+
+      MAX_SESSIONS_PER_USER: 5
+
+      CARD_ENCRYPTION_KEY: wM2y4L8tZ+P9v3uQ6e1sR0hT7fG5jK2l
+
+      LOGGING_LEVEL_COM_EXAMPLE_BANKCARDS: INFO
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: WARN
+
+      SPRING_PROFILES_ACTIVE: docker
+
+      SPRING_LIQUIBASE_ENABLED: true
+
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bank-network
+    volumes:
+      - app_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  adminer:
+    image: adminer:latest
+    container_name: bank-adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    networks:
+      - bank-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  app_logs:
+    driver: local
+
+networks:
+  bank-network:
+    driver: bridge

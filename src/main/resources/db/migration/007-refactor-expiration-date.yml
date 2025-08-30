@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-001
+      author: bank-system
+      comment: Change expiration_date to separate month and year fields
+      changes:
+        # Добавляем новые поля
+        - addColumn:
+            tableName: cards
+            columns:
+              - column:
+                  name: expiration_month
+                  type: INTEGER
+              - column:
+                  name: expiration_year
+                  type: INTEGER
+
+        # Добавляем NOT NULL ограничения для новых полей
+        - addNotNullConstraint:
+            tableName: cards
+            columnName: expiration_month
+            columnDataType: INTEGER
+
+        - addNotNullConstraint:
+            tableName: cards
+            columnName: expiration_year
+            columnDataType: INTEGER
+
+        # Удаляем старое поле
+        - dropColumn:
+            tableName: cards
+            columnName: expiration_date

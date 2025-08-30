@@ -1,0 +1,99 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-001
+      author: bank-system
+      comment: Insert default roles
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: role_name
+                  value: USER
+              - column:
+                  name: enabled
+                  valueBoolean: true
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: role_name
+                  value: ADMIN
+              - column:
+                  name: enabled
+                  valueBoolean: true
+
+  - changeSet:
+      id: 002-002
+      author: bank-system
+      comment: Insert test users
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+                  value: admin
+              - column:
+                  name: password_hash
+                  value: $2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.
+              - column:
+                  name: enabled
+                  valueBoolean: true
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+                  value: user
+              - column:
+                  name: password_hash
+                  value: $2a$10$3DJHiSMt/7PTgxKWWWAO4.F3KMPx1JfhXn7KSjGjCnT1qF1WX4Hve
+              - column:
+                  name: enabled
+                  valueBoolean: true
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+                  value: testuser
+              - column:
+                  name: password_hash
+                  value: $2a$10$5U7OHNx3.5G1YBp9MXP0f.VgKXNhZGf9VzF1VxYJhLbKcZd8KQTZS
+              - column:
+                  name: enabled
+                  valueBoolean: true
+
+  - changeSet:
+      id: 002-003
+      author: bank-system
+      comment: Assign roles to users
+      changes:
+        - insert:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 2
+        - insert:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 2
+              - column:
+                  name: role_id
+                  valueNumeric: 1
+        - insert:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 3
+              - column:
+                  name: role_id
+                  valueNumeric: 1
